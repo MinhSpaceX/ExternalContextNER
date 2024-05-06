@@ -17,6 +17,7 @@ from ner_evaluate import evaluate_each_class
 from seqeval.metrics import classification_report
 from ner_evaluate import evaluate
 from tqdm import tqdm, trange
+from torch.optim import AdamW
 import json
 CONFIG_NAME = 'bert_config.json'
 WEIGHTS_NAME = 'pytorch_model.bin'
@@ -291,9 +292,11 @@ elif n_gpu > 1:
 
 param_optimizer = list(model.named_parameters())
 no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+
 optimizer_grouped_parameters = [
-    {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
-    {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+    {'params': [p for n, p in param_optimizer if not any(nd in n for nd in ['crf']) and not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
+    {'params': [p for n, p in param_optimizer if not any(nd in n for nd in ['crf']) and any(nd in n for nd in no_decay)], 'weight_decay': 0.0},
+    {'lr' : 0.05, 'params': [p for n, p in param_optimizer if any(nd in n for nd in ['crf'])]}
 ]
 
 if args.fp16:
@@ -491,7 +494,6 @@ if args.mm_model == 'MTCCMBert':
     model = Roberta_token_classification.from_pretrained(args.bert_model, num_labels_=num_labels)
     model.load_state_dict(torch.load(output_model_file))
     model.to(device)
-    encoder_state_dict = torch.load(output_encoder_file)
 else:
     print('please define your MNER Model')
 

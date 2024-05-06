@@ -491,7 +491,6 @@ if args.mm_model == 'MTCCMBert':
     model = Roberta_token_classification.from_pretrained(args.bert_model, num_labels_=num_labels)
     model.load_state_dict(torch.load(output_model_file))
     model.to(device)
-    encoder_state_dict = torch.load(output_encoder_file)
 else:
     print('please define your MNER Model')
 
