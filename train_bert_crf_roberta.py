@@ -265,7 +265,7 @@ if args.do_train:
         num_train_optimization_steps = num_train_optimization_steps // torch.distributed.get_world_size()
 
 if args.mm_model == 'MTCCMBert':
-    model = BERT_token_classification.from_pretrained(args.bert_model,
+    model = Roberta_token_classification.from_pretrained(args.bert_model,
                                                                     cache_dir=args.cache_dir,
                                                                     num_labels_=num_labels)
 else:
@@ -488,7 +488,7 @@ if args.do_train:
 
 # loadmodel
 if args.mm_model == 'MTCCMBert':
-    model = BERT_token_classification.from_pretrained(args.bert_model, num_labels_=num_labels)
+    model = Roberta_token_classification.from_pretrained(args.bert_model, num_labels_=num_labels)
     model.load_state_dict(torch.load(output_model_file))
     model.to(device)
     encoder_state_dict = torch.load(output_encoder_file)
