@@ -1,8 +1,8 @@
-from transformers import RobertaModel
+from transformers import XLMRobertaModel
 
 import copy
-from transformers.models.roberta.modeling_roberta import RobertaIntermediate,RobertaOutput,RobertaSelfOutput,RobertaPreTrainedModel
-from transformers import RobertaConfig
+from transformers.models.xlm_roberta.modeling_xlm_roberta import XLMRobertaIntermediate,XLMRobertaOutput,XLMRobertaSelfOutput,XLMRobertaPreTrainedModel
+from transformers import XLMRobertaConfig
 from torch import nn as nn
 from torchcrf import CRF
 import torch
@@ -12,11 +12,11 @@ import torch
 import torch.nn.functional as F  # For softmax
 
 
-class Roberta_token_classification(RobertaPreTrainedModel):
+class XLMRoberta_token_classification(XLMRobertaPreTrainedModel):
     def __init__(self, config, num_labels_=2, auxnum_labels=2):
-        super(Roberta_token_classification, self).__init__(config)
+        super(XLMRoberta_token_classification, self).__init__(config)
         self.num_labels = num_labels_
-        self.roberta = RobertaModel(config)
+        self.roberta = XLMRobertaModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.classifier = nn.Linear(config.hidden_size, num_labels_)
         self.crf = CRF(num_labels_, batch_first=True)
@@ -44,5 +44,5 @@ class Roberta_token_classification(RobertaPreTrainedModel):
 
 
 if __name__ == "__main__":
-    model = Roberta_token_classification.from_pretrained(r'D:\ExternalContextNER\cache\pubmedRoberta')
+    model = XLMRoberta_token_classification.from_pretrained(r'D:\ExternalContextNER\cache\pubmedXLMRoberta')
     print(model)
