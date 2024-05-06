@@ -32,14 +32,12 @@ class SBInputExample(object):
 class SBInputFeatures(object):
     """A single set of features of data"""
 
-    def __init__(self,input_ids,input_mask,segment_ids,label_id,auxlabel_id,input_mask_addition,label_ids_addition):
+    def __init__(self,input_ids,input_mask,segment_ids,label_id,auxlabel_id):
         self.input_ids = input_ids
         self.input_mask = input_mask
         self.segment_ids = segment_ids
         self.label_id = label_id
         self.auxlabel_id = auxlabel_id
-        self.input_mask_addition = input_mask_addition
-        self.label_ids_addition = label_ids_addition
 
 def sbreadfile(filename,do_lower=False):
     '''
@@ -73,12 +71,9 @@ def sbreadfile(filename,do_lower=False):
             splits[0] = splits[0].lower()
 
         if splits[0] == "<eos>":
-            splits[0] = "[SEP]"
-
-        if splits[0] == "<EOS>":
-            splits[0] = "[SEP]"
+            splits[0] = "</s>"
         if splits[0] == '' or splits[0].isspace() or splits[0] in SPECIAL_TOKENS or splits[0].startswith(URL_PREFIX):
-            splits[0] = "[UNK]"
+            splits[0] = "<unk>"
         
         sentence.append(splits[0])
         cur_label = splits[-1][:-1]
@@ -138,30 +133,29 @@ class MNERProcessor(DataProcessor):
         return self._create_examples(data, auxlabels, "test")
 
     def get_labels(self):
-        return ["O","B-Disease","I-Disease","B-Chemical","I-Chemical","E","X","[CLS]", "[SEP]"]
         
-        # return ["O","B-Disease","I-Disease","E","X","[CLS]", "[SEP]"]
+        # return ["O","B-Disease","I-Disease","E","X","<s>", "</s>"]
         # vlsp2021
-        # return ["O","I-PRODUCT-AWARD","B-MISCELLANEOUS","B-QUANTITY-NUM","B-ORGANIZATION-SPORTS","B-DATETIME","I-ADDRESS","I-PERSON","I-EVENT-SPORT","B-ADDRESS","B-EVENT-NATURAL","I-LOCATION-GPE","B-EVENT-GAMESHOW","B-DATETIME-TIMERANGE","I-QUANTITY-NUM","I-QUANTITY-AGE","B-EVENT-CUL","I-QUANTITY-TEM","I-PRODUCT-LEGAL","I-LOCATION-STRUC","I-ORGANIZATION","B-PHONENUMBER","B-IP","B-QUANTITY-AGE","I-DATETIME-TIME","I-DATETIME","B-ORGANIZATION-MED","B-DATETIME-SET","I-EVENT-CUL","B-QUANTITY-DIM","I-QUANTITY-DIM","B-EVENT","B-DATETIME-DATERANGE","I-EVENT-GAMESHOW","B-PRODUCT-AWARD","B-LOCATION-STRUC","B-LOCATION","B-PRODUCT","I-MISCELLANEOUS","B-SKILL","I-QUANTITY-ORD","I-ORGANIZATION-STOCK","I-LOCATION-GEO","B-PERSON","B-PRODUCT-COM","B-PRODUCT-LEGAL","I-LOCATION","B-QUANTITY-TEM","I-PRODUCT","B-QUANTITY-CUR","I-QUANTITY-CUR","B-LOCATION-GPE","I-PHONENUMBER","I-ORGANIZATION-MED","I-EVENT-NATURAL","I-EMAIL","B-ORGANIZATION","B-URL","I-DATETIME-TIMERANGE","I-QUANTITY","I-IP","B-EVENT-SPORT","B-PERSONTYPE","B-QUANTITY-PER","I-QUANTITY-PER","I-PRODUCT-COM","I-DATETIME-DURATION","B-LOCATION-GPE-GEO","B-QUANTITY-ORD","I-EVENT","B-DATETIME-TIME","B-QUANTITY","I-DATETIME-SET","I-LOCATION-GPE-GEO","B-ORGANIZATION-STOCK","I-ORGANIZATION-SPORTS","I-SKILL","I-URL","B-DATETIME-DURATION","I-DATETIME-DATE","I-PERSONTYPE","B-DATETIME-DATE","I-DATETIME-DATERANGE","B-LOCATION-GEO","B-EMAIL","X","[CLS]", "[SEP]"]
+        # return ["O","I-PRODUCT-AWARD","B-MISCELLANEOUS","B-QUANTITY-NUM","B-ORGANIZATION-SPORTS","B-DATETIME","I-ADDRESS","I-PERSON","I-EVENT-SPORT","B-ADDRESS","B-EVENT-NATURAL","I-LOCATION-GPE","B-EVENT-GAMESHOW","B-DATETIME-TIMERANGE","I-QUANTITY-NUM","I-QUANTITY-AGE","B-EVENT-CUL","I-QUANTITY-TEM","I-PRODUCT-LEGAL","I-LOCATION-STRUC","I-ORGANIZATION","B-PHONENUMBER","B-IP","B-QUANTITY-AGE","I-DATETIME-TIME","I-DATETIME","B-ORGANIZATION-MED","B-DATETIME-SET","I-EVENT-CUL","B-QUANTITY-DIM","I-QUANTITY-DIM","B-EVENT","B-DATETIME-DATERANGE","I-EVENT-GAMESHOW","B-PRODUCT-AWARD","B-LOCATION-STRUC","B-LOCATION","B-PRODUCT","I-MISCELLANEOUS","B-SKILL","I-QUANTITY-ORD","I-ORGANIZATION-STOCK","I-LOCATION-GEO","B-PERSON","B-PRODUCT-COM","B-PRODUCT-LEGAL","I-LOCATION","B-QUANTITY-TEM","I-PRODUCT","B-QUANTITY-CUR","I-QUANTITY-CUR","B-LOCATION-GPE","I-PHONENUMBER","I-ORGANIZATION-MED","I-EVENT-NATURAL","I-EMAIL","B-ORGANIZATION","B-URL","I-DATETIME-TIMERANGE","I-QUANTITY","I-IP","B-EVENT-SPORT","B-PERSONTYPE","B-QUANTITY-PER","I-QUANTITY-PER","I-PRODUCT-COM","I-DATETIME-DURATION","B-LOCATION-GPE-GEO","B-QUANTITY-ORD","I-EVENT","B-DATETIME-TIME","B-QUANTITY","I-DATETIME-SET","I-LOCATION-GPE-GEO","B-ORGANIZATION-STOCK","I-ORGANIZATION-SPORTS","I-SKILL","I-URL","B-DATETIME-DURATION","I-DATETIME-DATE","I-PERSONTYPE","B-DATETIME-DATE","I-DATETIME-DATERANGE","B-LOCATION-GEO","B-EMAIL","X","<s>", "</s>"]
         
         # vlsp2016
-        # return ["B-ORG","B-MISC","I-PER","I-ORG","B-LOC","I-MISC","I-LOC","O","B-PER","X","[CLS]","[SEP]"]
+        return ["B-ORG","B-MISC","I-PER","I-ORG","B-LOC","I-MISC","I-LOC","O","B-PER","X","<s>","</s>"]
 
         # vlsp2018
-        # return ["I-ORGANIZATION","B-ORGANIZATION","I-LOCATION","B-MISCELLANEOUS","I-PERSON","B-PERSON","O","I-MISCELLANEOUS","B-LOCATION","X","[CLS]","[SEP]"]
+        # return ["I-ORGANIZATION","B-ORGANIZATION","I-LOCATION","B-MISCELLANEOUS","I-PERSON","B-PERSON","O","I-MISCELLANEOUS","B-LOCATION","X","<s>","</s>"]
 
     def get_auxlabels(self):
-        return ["O", "B", "I","E", "X", "[CLS]", "[SEP]"]
+        return ["O", "B", "I", "X", "<s>", "</s>"]
 
     def get_start_label_id(self):
         label_list = self.get_labels()
         label_map = {label: i for i, label in enumerate(label_list, 1)}
-        return label_map['[CLS]']
+        return label_map['<s>']
 
     def get_stop_label_id(self):
         label_list = self.get_labels()
         label_map = {label: i for i, label in enumerate(label_list, 1)}
-        return label_map['[SEP]']
+        return label_map['</s>']
 
     def _create_examples(self, lines, auxlabels, set_type):
         examples = []
@@ -174,9 +168,6 @@ class MNERProcessor(DataProcessor):
             examples.append(
                 SBInputExample(guid=guid, text_a=text_a, text_b=text_b, label=label, auxlabel=auxlabel))
         return examples
-
-def chkList(lst):
-    return len(set(lst)) == 1
 
 def convert_mm_examples_to_features(examples, label_list, auxlabel_list,
  max_seq_length, tokenizer):
@@ -214,55 +205,34 @@ def convert_mm_examples_to_features(examples, label_list, auxlabel_list,
         segment_ids = []
         label_ids = []
         auxlabel_ids = []
-        input_mask_addition = []
-        label_ids_addition = []
-        segment = 0
-        ntokens.append("[CLS]")
-        segment_ids.append(segment)
-        label_ids.append(label_map["[CLS]"])
-        auxlabel_ids.append(auxlabel_map["[CLS]"])
-        tmp_mask_addition = 0
+        ntokens.append("<s>")
+        segment_ids.append(0)
+        label_ids.append(label_map["<s>"])
+        auxlabel_ids.append(auxlabel_map["<s>"])
         for i, token in enumerate(tokens):
             ntokens.append(token)
-            segment_ids.append(segment)
+            segment_ids.append(0)
             label_ids.append(label_map[labels[i]])
             auxlabel_ids.append(auxlabel_map[auxlabels[i]])
-            if token == "[SEP]":
-                segment+=1
-                tmp_mask_addition = len(tokenizer.convert_tokens_to_ids(ntokens+["[SEP]"]))
-        ntokens.append("[SEP]")
-        segment_ids.append(segment)
-        label_ids.append(label_map["[SEP]"])
-        auxlabel_ids.append(auxlabel_map["[SEP]"])
+        ntokens.append("</s>")
+        segment_ids.append(0)
+        label_ids.append(label_map["</s>"])
+        auxlabel_ids.append(auxlabel_map["</s>"])
         input_ids = tokenizer.convert_tokens_to_ids(ntokens)
-        if tmp_mask_addition == 0:
-            tmp_mask_addition = len(input_ids)
-        input_mask_addition = [1] * tmp_mask_addition
-        label_ids_addition = label_ids[:tmp_mask_addition]
         input_mask = [1] * len(input_ids)
 
         while len(input_ids) < max_seq_length:
             input_ids.append(0)
             input_mask.append(0)
-            segment_ids.append(segment)
+            segment_ids.append(0)
             label_ids.append(0)
             auxlabel_ids.append(0)
 
-        while len(input_mask_addition) < max_seq_length:
-            input_mask_addition.append(0)
-            label_ids_addition.append(0)
-
-        # if chkList(input_mask_addition):
-        #     print("input_mask_addition: ", input_mask_addition)
-        #     print(textlist)
         assert len(input_ids) == max_seq_length
         assert len(input_mask) == max_seq_length
         assert len(segment_ids) == max_seq_length
         assert len(label_ids) == max_seq_length
         assert len(auxlabel_ids) == max_seq_length
-        assert len(input_mask_addition) == max_seq_length
-        assert len(label_ids_addition) == max_seq_length
-
 
 
         if ex_index < 2:
@@ -276,12 +246,10 @@ def convert_mm_examples_to_features(examples, label_list, auxlabel_list,
                 "segment_ids: %s" % " ".join([str(x) for x in segment_ids]))
             logger.info("label: %s" % " ".join([str(x) for x in label_ids]))
             logger.info("auxlabel: %s" % " ".join([str(x) for x in auxlabel_ids]))
-            logger.info("input_mask_addition: %s" % " ".join([str(x) for x in input_mask_addition]))
-            logger.info("label_ids_addition: %s" % " ".join([str(x) for x in label_ids_addition]))
 
         features.append(
             SBInputFeatures(input_ids=input_ids, input_mask=input_mask, segment_ids=segment_ids,
-                label_id=label_ids, auxlabel_id=auxlabel_ids, input_mask_addition=input_mask_addition, label_ids_addition=label_ids_addition))
+                label_id=label_ids, auxlabel_id=auxlabel_ids))
 
     print('the number of problematic samples: ' + str(count))
     return features
