@@ -12,6 +12,8 @@ import torch
 import torch.nn.functional as F  # For softmax
 
 class BERT_token_classification(BertPreTrainedModel):
+    """Coupled Cross-Modal Attention BERT model for token-level classification with a softmax layer on top.
+    """
     def __init__(self, config, num_labels_=2, auxnum_labels=2):
         super(BERT_token_classification, self).__init__(config)
         self.num_labels = num_labels_

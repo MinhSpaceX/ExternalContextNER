@@ -10,7 +10,7 @@ import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer,BertConfig
 from modules.model_architecture.bert_softmax import BERT_token_classification
-from modules.datasets.dataset_bert_basic import convert_mm_examples_to_features,MNERProcessor
+from modules.datasets.dataset_bert_no_image import convert_mm_examples_to_features,MNERProcessor
 from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,TensorDataset)
 from pytorch_pretrained_bert.optimization import BertAdam,warmup_linear
 from ner_evaluate import evaluate_each_class
@@ -439,7 +439,7 @@ if args.do_train:
                     if j == 0:
                         continue
                     if m:
-                        if label_map[label_ids[i][j]] != "X" and label_map[label_ids[i][j]] != "[SEP]":
+                        if label_map[label_ids[i][j]] != "X" and label_map[label_ids[i][j]] != "[SEP]" and label_map[label_ids[i][j]] != "SEP]" and label_map[label_ids[i][j]] != "E":
                             temp_1.append(label_map[label_ids[i][j]])
                             tmp1_idx.append(label_ids[i][j])
                             temp_2.append(label_map[logits[i][j]])
@@ -454,7 +454,7 @@ if args.do_train:
 
         report = classification_report(y_true, y_pred, digits=4)
         sentence_list = []
-        dev_data, imgs, _ = processor._read_sbtsv(os.path.join(args.data_dir, "dev.txt"))
+        dev_data, _ = processor._read_sbtsv(os.path.join(args.data_dir, "dev.txt"))
         for i in range(len(y_pred)):
             sentence = dev_data[i][0]
             sentence_list.append(sentence)
@@ -491,7 +491,6 @@ if args.mm_model == 'MTCCMBert':
     model = BERT_token_classification.from_pretrained(args.bert_model, num_labels_=num_labels)
     model.load_state_dict(torch.load(output_model_file))
     model.to(device)
-    encoder_state_dict = torch.load(output_encoder_file)
 else:
     print('please define your MNER Model')
 
@@ -544,7 +543,7 @@ if args.do_eval and (args.local_rank == -1 or torch.distributed.get_rank() == 0)
                 if j == 0:
                     continue
                 if m:
-                    if label_map[label_ids[i][j]] != "X" and label_map[label_ids[i][j]] != "[SEP]":
+                    if label_map[label_ids[i][j]] != "X" and label_map[label_ids[i][j]] != "[SEP]" and label_map[label_ids[i][j]] != "SEP]" and label_map[label_ids[i][j]] != "E":
                         temp_1.append(label_map[label_ids[i][j]])
                         tmp1_idx.append(label_ids[i][j])
                         temp_2.append(label_map[logits[i][j]])
@@ -561,16 +560,14 @@ if args.do_eval and (args.local_rank == -1 or torch.distributed.get_rank() == 0)
     report = classification_report(y_true, y_pred, digits=4)
 
     sentence_list = []
-    test_data, imgs, _ = processor._read_sbtsv(os.path.join(args.data_dir, "test.txt"))
+    test_data, _ = processor._read_sbtsv(os.path.join(args.data_dir, "test.txt"))
     output_pred_file = os.path.join(args.output_dir, "mtmner_pred.txt")
     fout = open(output_pred_file, 'w')
     for i in range(len(y_pred)):
         sentence = test_data[i][0]
         sentence_list.append(sentence)
-        img = imgs[i]
         samp_pred_label = y_pred[i]
         samp_true_label = y_true[i]
-        fout.write(img + '\n')
         fout.write(' '.join(sentence) + '\n')
         fout.write(' '.join(samp_pred_label) + '\n')
         fout.write(' '.join(samp_true_label) + '\n' + '\n')
