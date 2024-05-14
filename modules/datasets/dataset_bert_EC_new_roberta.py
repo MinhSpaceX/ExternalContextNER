@@ -141,7 +141,7 @@ class MNERProcessor(DataProcessor):
     def get_labels(self):
         
         # return ["O","B-Disease","I-Disease","B-Chemical","I-Chemical","E","X","<s>", "</s>"]
-        return ["B-ORG","B-MISC","I-PER","I-ORG","B-LOC","I-MISC","I-LOC","O","B-PER","E","X","[CLS]","[SEP]"]
+        return ["B-ORG","B-MISC","I-PER","I-ORG","B-LOC","I-MISC","I-LOC","O","B-PER","E","X","<s>","</s>"]
         # return ["O","B-Disease","I-Disease","E","X","<s>", "</s>"]
 
     def get_auxlabels(self):
