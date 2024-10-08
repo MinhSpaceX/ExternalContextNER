@@ -14,7 +14,7 @@ import torch.nn.functional as F  # For softmax
 class WordDropout(nn.Module):
     def __init__(self, dropout_rate: float = 0.1):
         super(WordDropout, self).__init__()
-        assert 0.0 <= dropout_rate < 1.0,
+        assert 0.0 <= dropout_rate < 1.0, '0.0 <= dropout rate < 1.0 must be satisfied!'
         self.dropout_rate = dropout_rate
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
