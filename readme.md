@@ -7,7 +7,6 @@ This repository contains a re-implementation of the Named Entity Recognition (NE
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Training](#training)
 
 ## Project Structure
 
@@ -15,7 +14,6 @@ The key files and directories are:
 
 ```
 .
-├── .gitignore                     # Git ignore settings
 ├── requirements.txt               # Dependencies
 ├── setup.py                       # Package setup
 ├── train_bert_crf.py              # Training script for BERT+CRF
@@ -24,7 +22,6 @@ The key files and directories are:
 ├── modules/                       # Model architectures and datasets
 │   ├── model_architecture/
 │   ├── datasets/
-├── output_vlsp2016/               # Output directory for VLSP2016 results
 ├── tmp_data/                      # Temporary data storage
 ├── run_twitter2015_more.sh        # Script to run Twitter dataset
 ├── ner_evaluate.py                # Evaluation script for NER models

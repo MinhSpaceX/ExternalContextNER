@@ -1,13 +1,6 @@
-from transformers import XLMRobertaModel
-
-import copy
-from transformers.models.xlm_roberta.modeling_xlm_roberta import XLMRobertaIntermediate,XLMRobertaOutput,XLMRobertaSelfOutput,XLMRobertaPreTrainedModel
-from transformers import XLMRobertaConfig
-from torch import nn as nn
+from transformers import XLMRobertaModel, XLMRobertaPreTrainedModel, XLMRobertaConfig
+from torch import nn
 from torchcrf import CRF
-import torch
-import math
-import json
 import torch
 import torch.nn.functional as F  # For softmax
 
@@ -28,7 +21,7 @@ class WordDropout(nn.Module):
         return inputs * mask
 
 class XLMRoberta_token_classification(XLMRobertaPreTrainedModel):
-    def __init__(self, config, num_labels_=2, auxnum_labels=2):
+    def __init__(self, config: XLMRobertaConfig, num_labels_: int = 2, auxnum_labels: int = 2):
         super(XLMRoberta_token_classification, self).__init__(config)
         self.num_labels = num_labels_
         self.roberta = XLMRobertaModel(config)
@@ -37,64 +30,37 @@ class XLMRoberta_token_classification(XLMRobertaPreTrainedModel):
         self.crf = CRF(num_labels_, batch_first=True)
         self.init_weights()
 
-    def forward(self, input_ids, segment_ids, input_mask, input_ids2, segment_ids2, input_mask2, labels=None, labels2 = None):
-        features = self.roberta(input_ids = input_ids, token_type_ids=segment_ids, attention_mask=input_mask)
+    def forward(
+        self, 
+        input_ids: torch.Tensor, 
+        segment_ids: torch.Tensor, 
+        input_mask: torch.Tensor, 
+        input_ids2: torch.Tensor, 
+        segment_ids2: torch.Tensor, 
+        input_mask2: torch.Tensor, 
+        labels: torch.Tensor = None, 
+        labels2: torch.Tensor = None
+    ) -> torch.Tensor:
+        
+        # Forward pass through first set of inputs
+        features = self.roberta(input_ids=input_ids, attention_mask=input_mask)
         sequence_output = features["last_hidden_state"]
         sequence_output = self.dropout(sequence_output)
         logits = self.classifier(sequence_output)
-    
+
         if labels is not None:
-            features2 = self.roberta(input_ids = input_ids2, token_type_ids=segment_ids2, attention_mask=input_mask2)
+            # Forward pass through second set of inputs for auxiliary task
+            features2 = self.roberta(input_ids=input_ids2, token_type_ids=segment_ids2, attention_mask=input_mask2)
             sequence_output2 = features2["last_hidden_state"]
             sequence_output2 = self.dropout(sequence_output2)
             logits2 = self.classifier(sequence_output2)
 
-            loss1 = -self.crf(logits, labels, mask=input_mask.byte(), reduction='mean')
-            loss2 = -self.crf(logits2, labels2, mask=input_mask2.byte(), reduction='mean')
+            # Compute CRF loss
+            loss1 = -self.crf(logits, labels, mask=input_mask.to(torch.uint8), reduction='mean')
+            loss2 = -self.crf(logits2, labels2, mask=input_mask2.to(torch.uint8), reduction='mean')
             main_loss = 0.5 * (loss1 + loss2)
             return main_loss
         else:
-            pred_tags = self.crf.decode(logits, mask=input_mask.byte())
+            # During inference, decode the CRF output
+            pred_tags = self.crf.decode(logits, mask=input_mask.to(torch.uint8))
             return pred_tags
-
-    # def forward(self, input_ids, segment_ids, input_mask, input_ids2, segment_ids2, input_mask2, labels=None, labels2 = None):
-    #     features = self.roberta(input_ids, token_type_ids=segment_ids, attention_mask=input_mask)
-    #     sequence_output = features["last_hidden_state"]
-    #     sequence_output = self.dropout(sequence_output)
-    #     logits = self.classifier(sequence_output)
-    
-    #     if labels is not None:
-    #         features2 = self.roberta(input_ids2, token_type_ids=segment_ids2, attention_mask=input_mask2)
-    #         sequence_output2 = features2["last_hidden_state"]
-    #         sequence_output2 = self.dropout(sequence_output2)
-    #         logits2 = self.classifier(sequence_output2)
-    #         origin_size = logits2.size(1 if logits2.dim() == 3 else 0)
-    #         logits_short = logits[..., :origin_size, :]
-    #         T=1.0
-    #         loss1 = -self.crf(logits, labels, mask=input_mask.byte(), reduction='mean')
-    #         loss2 = -self.crf(logits2, labels2, mask=input_mask2.byte(), reduction='mean')
-    #         batch_size, max_seq_len, num_classes = logits_short.shape
-    #         logits_short = logits_short.detach()
-    #         origin_view_log_posterior = self.crf.compute_posterior(logits2, input_mask2.byte())
-    #         ext_view_log_posterior = self.crf.compute_posterior(logits_short, input_mask2.byte())
-    #         _loss = (
-    #             F.kl_div(
-    #                 F.log_softmax(origin_view_log_posterior / T, dim=-1),
-    #                 F.softmax(ext_view_log_posterior / T, dim=-1),
-    #                 reduction='none',
-    #             )
-    #             * input_mask2.unsqueeze(-1)
-    #             * T
-    #             * T
-    #         )
-    #         loss_crf_kl = _loss.sum() / batch_size
-    #         main_loss = 0.5 * (loss1 + loss2)  + (1 - 0.5) * loss_crf_kl
-    #         return main_loss
-    #     else:
-    #         pred_tags = self.crf.decode(logits, mask=input_mask.byte())
-    #         return pred_tags
-
-
-if __name__ == "__main__":
-    model = XLMRoberta_token_classification.from_pretrained(r'D:\ExternalContextNER\cache\pubmedXLMRoberta')
-    print(model)
