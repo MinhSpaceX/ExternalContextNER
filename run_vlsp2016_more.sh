@@ -3,8 +3,8 @@ echo "## Run"
 task_name="sonba"
 learning_rate=3e-5
 num_train_epochs=10
-train_batch_size=1
-bert_model="FacebookAI/xlm-roberta-large"
+train_batch_size=2
+bert_model="FacebookAI/xlm-roberta-base"
 
 # bert_model="vinai/phobert-base-v2"
 data_dir="tmp_data/VLSP2016"

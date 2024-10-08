@@ -387,14 +387,6 @@ if args.do_train:
         for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
             batch = tuple(t.to(device) for t in batch)
             input_ids,input_mask,segment_ids,input_ids2,input_mask2,segment_ids2,label_id,label_id2 = batch
-            print("input_ids shape:", input_ids.shape)
-            print("segment_ids shape:", segment_ids.shape)
-            print("input_mask shape:", input_mask.shape)
-            print("input_ids2 shape:", input_ids2.shape)
-            print("segment_ids2 shape:", segment_ids2.shape)
-            print("input_mask2 shape:", input_mask2.shape)
-            print("label_id shape:", label_id.shape)
-            print("label_id2 shape:", label_id2.shape)
             neg_log_likelihood = model(input_ids,segment_ids,input_mask,input_ids2,segment_ids2,input_mask2,label_id,label_id2)
 
             if n_gpu > 1:

@@ -2,8 +2,6 @@ import torch
 import logging
 import os
 logger = logging.getLogger(__name__)
-from torchvision import transforms
-from PIL import Image
 SPECIAL_TOKENS = ['\ufe0f', '\u200d', '\u200b', '\x92']
 URL_PREFIX = 'http'
 
@@ -254,14 +252,14 @@ def convert_mm_examples_to_features(examples, label_list, auxlabel_list,
         input_mask2 = [1] * len(input_ids2)
 
         while len(input_ids) < max_seq_length:
-            input_ids.append(0)
+            input_ids.append(1)
             input_mask.append(0)
             segment_ids.append(segment)
             label_ids.append(0)
             auxlabel_ids.append(0)
 
         while len(input_ids2) < max_seq_length:
-            input_ids2.append(0)
+            input_ids2.append(1)
             input_mask2.append(0)
             segment_ids2.append(0)
             label_ids2.append(0)

@@ -2,8 +2,6 @@ import torch
 import logging
 import os
 logger = logging.getLogger(__name__)
-from torchvision import transforms
-from PIL import Image
 SPECIAL_TOKENS = ['\ufe0f', '\u200d', '\u200b', '\x92']
 URL_PREFIX = 'http'
 
