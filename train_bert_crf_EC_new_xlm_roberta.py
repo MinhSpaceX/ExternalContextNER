@@ -269,6 +269,7 @@ if args.mm_model == 'MTCCMBert':
     model = XLMRoberta_token_classification.from_pretrained(args.bert_model,
                                                                     cache_dir=args.cache_dir,
                                                                     num_labels_=num_labels)
+    print(model)
 else:
     print('please define your MNER Model')
 

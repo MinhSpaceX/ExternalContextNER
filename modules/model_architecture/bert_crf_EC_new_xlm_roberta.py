@@ -38,13 +38,13 @@ class XLMRoberta_token_classification(XLMRobertaPreTrainedModel):
         self.init_weights()
 
     def forward(self, input_ids, segment_ids, input_mask, input_ids2, segment_ids2, input_mask2, labels=None, labels2 = None):
-        features = self.roberta(input_ids, token_type_ids=segment_ids, attention_mask=input_mask)
+        features = self.roberta(input_ids = input_ids, token_type_ids=segment_ids, attention_mask=input_mask)
         sequence_output = features["last_hidden_state"]
         sequence_output = self.dropout(sequence_output)
         logits = self.classifier(sequence_output)
     
         if labels is not None:
-            features2 = self.roberta(input_ids2, token_type_ids=segment_ids2, attention_mask=input_mask2)
+            features2 = self.roberta(input_ids = input_ids2, token_type_ids=segment_ids2, attention_mask=input_mask2)
             sequence_output2 = features2["last_hidden_state"]
             sequence_output2 = self.dropout(sequence_output2)
             logits2 = self.classifier(sequence_output2)
