@@ -50,27 +50,10 @@ class BERT_token_classification(BertPreTrainedModel):
             sequence_output2 = features2["last_hidden_state"]
             sequence_output2 = self.dropout(sequence_output2)
             logits2 = self.classifier(sequence_output2)
-            origin_size = logits2.size(1 if logits2.dim() == 3 else 0)
-            logits_short = logits[..., :origin_size, :]
-            T=1.0
+
             loss1 = -self.crf(logits, labels, mask=input_mask.byte(), reduction='mean')
             loss2 = -self.crf(logits2, labels2, mask=input_mask2.byte(), reduction='mean')
-            batch_size, max_seq_len, num_classes = logits_short.shape
-            logits_short = logits_short.detach()
-            origin_view_log_posterior = self.crf.compute_posterior(logits2, input_mask2.byte())
-            ext_view_log_posterior = self.crf.compute_posterior(logits_short, input_mask2.byte())
-            _loss = (
-                F.kl_div(
-                    F.log_softmax(origin_view_log_posterior / T, dim=-1),
-                    F.softmax(ext_view_log_posterior / T, dim=-1),
-                    reduction='none',
-                )
-                * input_mask2.unsqueeze(-1)
-                * T
-                * T
-            )
-            loss_crf_kl = _loss.sum() / batch_size
-            main_loss = 0.5 * (loss1 + loss2)  + (1 - 0.5) * loss_crf_kl
+            main_loss = 0.5 * (loss1 + loss2)
             return main_loss
         else:
             pred_tags = self.crf.decode(logits, mask=input_mask.byte())

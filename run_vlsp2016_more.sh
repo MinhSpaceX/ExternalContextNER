@@ -17,7 +17,7 @@ data_dir="tmp_data/VLSP2016"
 cache_dir="cache"
 max_seq_length=512
 
-python train_bert_crf_EC_new_xlm_roberta.py \
+python train_bert_crf_EC_xlm_roberta.py \
     --do_train \
     --do_eval \
     --output_dir "./output_vlsp2016" \
